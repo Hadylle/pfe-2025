@@ -1,33 +1,33 @@
 import { create } from 'zustand';
 
+const defaultData = {
+  name: '',
+  email: '',
+  phone: '',
+  address: '',
+  portfolio: '',
+  linkedin: '',
+  github: '',
+  aboutMe: '',
+  skills: [],
+  experience: [],
+  education: [],
+  projects: [],
+  certifications: [],
+  languages: [],
+  interests: [],
+  socialClubs: []
+};
+
 export const useResumeStore = create((set) => ({
-  resumeData: {
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    portfolio: '',
-    linkedin: '',
-    github: '',
-    aboutMe: '',
-    skills: [],
-    experience: [],
-    education: [],
-    projects: [],
-    certifications: [],
-    languages: [],
-    interests: [],
-    socialClubs: []
-  },
+  resumeData: { ...defaultData },
 
   selectedTemplate: 'classic',
 
-  // ✅ Met à jour un champ simple (ex: name, email, etc.)
   updateField: (field, value) => set((state) => ({
     resumeData: { ...state.resumeData, [field]: value }
   })),
 
-  // ✅ Ajoute un élément à un tableau
   addArrayItem: (arrayField, item) => set((state) => ({
     resumeData: {
       ...state.resumeData,
@@ -35,7 +35,6 @@ export const useResumeStore = create((set) => ({
     }
   })),
 
-  // ✅ Met à jour un élément spécifique dans un tableau
   updateArrayItem: (arrayField, index, item) => set((state) => ({
     resumeData: {
       ...state.resumeData,
@@ -43,7 +42,6 @@ export const useResumeStore = create((set) => ({
     }
   })),
 
-  // ✅ Supprime un élément d’un tableau
   removeArrayItem: (arrayField, index) => set((state) => ({
     resumeData: {
       ...state.resumeData,
@@ -51,30 +49,10 @@ export const useResumeStore = create((set) => ({
     }
   })),
 
-  // ✅ Change le template
   setTemplate: (template) => set({ selectedTemplate: template }),
 
-  // ✅ Nouveau : remplace tout resumeData depuis un JSON (ex: après analyse AI)
+  // 🧠 Better: uses reusable defaultData
   setAllData: (data) => {
-    const defaultData = {
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-      portfolio: '',
-      linkedin: '',
-      github: '',
-      aboutMe: '',
-      skills: [],
-      experience: [],
-      education: [],
-      projects: [],
-      certifications: [],
-      languages: [],
-      interests: [],
-      socialClubs: []
-    };
-
     set({ resumeData: { ...defaultData, ...data } });
   }
 }));

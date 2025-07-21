@@ -1,27 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useResumeStore } from '../../store/resume-store';
 import { useForm } from 'react-hook-form';
 import { useDebounce } from 'use-debounce';
-import { motion } from 'framer-motion';
+import { FormContainer } from './ReusableComponents/FormContainer';
 
 export default function PersonalInfoForm() {
   const { resumeData, updateField } = useResumeStore();
+  const [photoPreview, setPhotoPreview] = useState(resumeData.photo || '');
 
   const { register, watch } = useForm({
     defaultValues: {
-      name: resumeData.name,
-      email: resumeData.email,
-      phone: resumeData.phone,
-      address: resumeData.address,
-      portfolio: resumeData.portfolio,
-      linkedin: resumeData.linkedin,
-      github: resumeData.github,
-      aboutMe: resumeData.aboutMe
+      name: resumeData.name || '',
+      email: resumeData.email || '',
+      phone: resumeData.phone || '',
+      address: resumeData.address || '',
+      portfolio: resumeData.portfolio || '',
+      linkedin: resumeData.linkedin || '',
+      github: resumeData.github || '',
+      aboutMe: resumeData.aboutMe || '',
+      photo: resumeData.photo || ''
     }
   });
 
   const watchedFormData = watch();
-  const [formData] = useDebounce(watchedFormData, 300); // Debounce by 300ms
+  const [formData] = useDebounce(watchedFormData, 300);
 
   React.useEffect(() => {
     Object.entries(formData).forEach(([field, value]) => {
@@ -29,84 +31,154 @@ export default function PersonalInfoForm() {
         updateField(field, value);
       }
     });
-  }, [formData]);
+  }, [formData, resumeData, updateField]);
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result);
+        updateField('photo', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removePhoto = () => {
+    setPhotoPreview('');
+    updateField('photo', '');
+  };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
-    >
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Personal Information</h2>
-
+    <FormContainer title="Personal Information">
       <div className="space-y-4">
+        {/* Photo Upload */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Profile Photo</label>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl text-gray-500">👤</span>
+                )}
+              </div>
+              {photoPreview && (
+                <button
+                  type="button"
+                  onClick={removePhoto}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            <div className="flex-1">
+              <input
+                type="file"
+                id="photo-upload"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="hidden"
+              />
+              <label
+                htmlFor="photo-upload"
+                className="cursor-pointer block w-full px-4 py-2 text-sm font-medium text-center text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 border border-blue-200"
+              >
+                {photoPreview ? 'Change Photo' : 'Upload Photo'}
+              </label>
+              <p className="text-xs text-gray-500 mt-1">Square images work best (max 2MB)</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Full Name</label>
+          <label className="block text-sm font-medium text-gray-700">Full Name*</label>
           <input
-            {...register('name')}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            {...register('name', { required: true })}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+            placeholder="John Doe"
           />
         </div>
 
+        {/* Email */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Email</label>
+          <label className="block text-sm font-medium text-gray-700">Email*</label>
           <input
             type="email"
-            {...register('email')}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            {...register('email', { required: true })}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+            placeholder="john@example.com"
           />
         </div>
 
+        {/* Phone */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Phone</label>
           <input
             type="tel"
             {...register('phone')}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+            placeholder="+1 (123) 456-7890"
           />
         </div>
 
+        {/* Address */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Address</label>
           <input
             {...register('address')}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+            placeholder="123 Main St, City, Country"
           />
         </div>
 
+        {/* Portfolio */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Portfolio</label>
+          <label className="block text-sm font-medium text-gray-700">Portfolio Website</label>
           <input
             {...register('portfolio')}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+            placeholder="https://yourportfolio.com"
           />
         </div>
 
+        {/* LinkedIn */}
         <div>
           <label className="block text-sm font-medium text-gray-700">LinkedIn</label>
           <input
             {...register('linkedin')}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+            placeholder="https://linkedin.com/in/yourprofile"
           />
         </div>
 
+        {/* GitHub */}
         <div>
           <label className="block text-sm font-medium text-gray-700">GitHub</label>
           <input
             {...register('github')}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+            placeholder="https://github.com/yourusername"
           />
         </div>
 
+        {/* About Me */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">About Me</label>
+          <label className="block text-sm font-medium text-gray-700">About Me*</label>
           <textarea
-            rows={3}
-            {...register('aboutMe')}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            rows={4}
+            {...register('aboutMe', { required: true })}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+            placeholder="Brief summary of your professional background and skills..."
           />
         </div>
       </div>
-    </motion.div>
+    </FormContainer>
   );
 }

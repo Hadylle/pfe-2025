@@ -1,10 +1,20 @@
+// components/resume/TemplateSelector.js
 import { useResumeStore } from '../../store/resume-store';
 import { motion } from 'framer-motion';
 
 const templates = [
-  { id: 'classic', name: 'Classic', description: 'Professional and clean' },
-  { id: 'modern', name: 'Modern', description: 'Contemporary design' },
-  // Add more templates
+  { 
+    id: 'classic', 
+    name: 'Classic', 
+    description: 'Professional single-column layout',
+    previewComponent: 'ClassicPreviewThumbnail' // You would create this component
+  },
+  { 
+    id: 'modern', 
+    name: 'Modern', 
+    description: 'Contemporary two-column design',
+    previewComponent: 'ModernPreviewThumbnail' // You would create this component
+  },
 ];
 
 export default function TemplateSelector() {
@@ -18,19 +28,27 @@ export default function TemplateSelector() {
     >
       <h2 className="text-lg font-medium text-gray-800 mb-3">Choose a Template</h2>
       
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {templates.map((template) => (
           <button
             key={template.id}
             onClick={() => setTemplate(template.id)}
-            className={`p-3 border rounded-lg text-left transition-all ${
+            className={`p-4 border-2 rounded-lg transition-all ${
               selectedTemplate === template.id 
-                ? 'border-blue-500 bg-blue-50' 
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-blue-500 bg-blue-50 shadow-md' 
+                : 'border-gray-200 hover:border-blue-300 bg-white'
             }`}
           >
-            <h3 className="font-medium">{template.name}</h3>
-            <p className="text-sm text-gray-600">{template.description}</p>
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+                {/* You would render the preview component here */}
+                <span className="text-xs text-gray-500">Preview</span>
+              </div>
+              <div className="text-left">
+                <h3 className="font-medium text-gray-900">{template.name}</h3>
+                <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+              </div>
+            </div>
           </button>
         ))}
       </div>

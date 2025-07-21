@@ -1,21 +1,18 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import Navbar from '../components/navbar';
-import Footer from '../components/footer';
-
 import PersonalInfoForm from '../components/build-resume/personal-info-form';
 import ExperienceForm from '../components/build-resume/experience-form';
 import EducationForm from '../components/build-resume/education-form';
 import SkillsForm from '../components/build-resume/skills-form';
 import ProjectForm from '../components/build-resume/project-form';
-import CertificationForm from '../components/build-resume/Certification-form';
+import CertificationForm from '../components/build-resume/certification-form';
 import LanguagesInterestsSocialForm from '../components/build-resume/languages-interests-social-form';
-
-import ResumePreview from '../components/resume/resume-preview';
+import TemplateWrapper from '../components/resume/TemplateWrapper';
 import TemplateSelector from '../components/resume/template-selector';
-
 import { useResumeStore } from '../store/resume-store';
 import { saveCvBuild } from '../api/cv-build-api';
+import { generatePdfFromJson } from '../api/pdf-api';
 
 const forms = [
   { id: 'personal', label: 'Personal Info', Component: PersonalInfoForm },
@@ -42,13 +39,27 @@ const variants = {
   })
 };
 
-export default function BuildResume() {
+export default function BuildResume({ mode = 'default' }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
   const [previewMode, setPreviewMode] = useState(false);
-
   const { resumeData } = useResumeStore();
   const CurrentForm = forms[currentStep].Component;
+
+  const handleDownloadPdf = async () => {
+    try {
+      const blob = await generatePdfFromJson(resumeData);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Updated_Improved_CV.pdf";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Failed to generate PDF");
+      console.error(err);
+    }
+  };
 
   const nextStep = () => {
     if (currentStep < forms.length - 1) {
@@ -76,8 +87,6 @@ export default function BuildResume() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-
-
       <main className="mx-auto py-8 px-2 sm:px-4 lg:px-6 w-full max-w-[1400px] flex-grow">
         <motion.div
           initial={{ opacity: 0 }}
@@ -160,17 +169,29 @@ export default function BuildResume() {
               </button>
             </div>
 
-            <div
-              className="bg-white rounded-b-lg shadow border border-gray-200 flex-grow overflow-auto p-6"
-            >
-              <ResumePreview previewMode={previewMode} />
+            <div className="bg-white rounded-b-lg shadow border border-gray-200 flex-grow overflow-auto p-6">
+              {previewMode ? (
+                <TemplateWrapper data={resumeData} />
+              ) : (
+                <div className="h-full flex items-center justify-center text-gray-400">
+                  <p>Preview will appear here when enabled</p>
+                </div>
+              )}
             </div>
+
+            {mode === 'edit-after-improve' && (
+              <div className="bg-white p-4 rounded-b-lg shadow border-t border-gray-200 flex justify-end">
+                <button
+                  onClick={handleDownloadPdf}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  ✅ Validate and Download PDF
+                </button>
+              </div>
+            )}
           </div>
         </motion.div>
       </main>
-
-      {/* Optional: Footer */}
-      <Footer />
     </div>
   );
 }

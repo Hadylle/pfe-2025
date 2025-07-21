@@ -6,9 +6,9 @@ const CVPreview = () => {
     {
       title: "Comprehensive CV Analysis",
       description:
-        "Unlock deep insights into your CV structure and content with AI-powered analysis. Receive a structured JSON output highlighting strengths and areas to improve.",
+        "Unlock deep insights into your CV structure and content with AI-powered analysis. Get a change to modify easily your CV Information.",
       image:
-        "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80",
+        "https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg",
       actionText: "Analyze My CV",
       reverse: false,
     },
@@ -17,7 +17,7 @@ const CVPreview = () => {
       description:
         "Instantly see how well your skills match job requirements. Discover missing and common skills to tailor your CV for maximum impact.",
       image:
-        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80",
+        "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg",
       actionText: "Match to Jobs",
       reverse: true,
     },
@@ -26,7 +26,7 @@ const CVPreview = () => {
       description:
         "Get professional, AI-generated feedback to polish your CV. Enhance content clarity, structure, and keyword optimization effortlessly.",
       image:
-        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80",
+        "https://images.pexels.com/photos/8850706/pexels-photo-8850706.jpeg",
       actionText: "Get Feedback",
       reverse: false,
     },
@@ -35,7 +35,7 @@ const CVPreview = () => {
       description:
         "Automatically customize your CV based on specific job descriptions. Boost your chances by highlighting the right skills and experience.",
       image:
-        "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80",
+        "https://images.pexels.com/photos/5439381/pexels-photo-5439381.jpeg",
       actionText: "Tailor CV",
       reverse: true,
     },
@@ -57,15 +57,7 @@ const CVPreview = () => {
       actionText: "Manage Storage",
       reverse: true,
     },
-    {
-      title: "Powered by Cutting-Edge AI",
-      description:
-        "Experience next-level resume building with our OllamaChatModel. Intelligent, adaptive, and ready to help you craft the perfect CV.",
-      image:
-        "https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=600&q=80",
-      actionText: "Explore AI Power",
-      reverse: false,
-    },
+
     {
       title: "Build Your CV from Scratch",
       description:
@@ -73,7 +65,7 @@ const CVPreview = () => {
       image:
         "https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=600&q=80",
       actionText: "Start Building",
-      reverse: true,
+      reverse: false,
     },
   ];
 
