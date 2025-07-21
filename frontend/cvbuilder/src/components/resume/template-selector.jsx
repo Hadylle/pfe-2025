@@ -13,7 +13,7 @@ const templates = [
     id: 'modern', 
     name: 'Modern', 
     description: 'Contemporary two-column design',
-    previewComponent: 'ModernPreviewThumbnail' // You would create this component
+    previewComponent: 'ModernPreviewThumbnail' 
   },
 ];
 

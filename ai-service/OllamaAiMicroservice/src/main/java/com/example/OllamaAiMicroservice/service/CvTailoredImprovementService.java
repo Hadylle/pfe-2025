@@ -18,11 +18,11 @@ public class CvTailoredImprovementService {
 
     public CvAnalysisResult tailorCvToJob(String cvText, String jobDescription) {
         String prompt = """
-You are a professional CV tailoring assistant with expertise in cybersecurity and HR.
+You are an expert CV tailoring assistant with advanced knowledge in cybersecurity and HR practices.
 
-You will be given:
-1. A user's CV in raw text (between the first ---)
-2. A job description (between the second ---)
+You will receive:
+1️⃣ The raw CV of a candidate (between the first ---)
+2️⃣ A cybersecurity job description (between the second ---)
 
 ---
 CV:
@@ -32,21 +32,22 @@ JOB DESCRIPTION:
 %s
 ---
 
-Your task is to improve and tailor the CV **for the specific job**, following these rules:
+🎯 **YOUR OBJECTIVE**:
+Rewrite the CV to maximize alignment with the job description, realistically integrating **job-relevant cybersecurity tools, protocols, skills, and keywords**, even if they were not explicitly mentioned in the original CV.
 
-✅ OBJECTIVE: Increase match with the job description (50%%+), by realistically integrating more **job-relevant skills, keywords, and technologies** from the job description into the CV.
+🔧 **TAILORING INSTRUCTIONS**:
+- Return ONLY a valid **JSON object** (schema is below).
+- ✏️ Enrich the CV with **phrasing and achievements** relevant to cybersecurity roles.
+- ✏️ Use **terminology** from the job description like `SIEM`, `SOC`, `NIST`, `risk assessment`, `incident response`, `OWASP`, `encryption`, `network defense`, etc.
+- ✅ Keep experience real but **expand responsibilities** where plausible (e.g., "Improved system security using NIST guidelines", "Automated vulnerability scans with Python").
+- ✅ Add relevant certifications (e.g., CompTIA Security+, CEH, OSCP) **if plausible**.
+- ✅ Modify `aboutMe`, `experience`, `projects`, and `skills` to reflect alignment with **cybersecurity** and **defensive security operations**.
+- ✅ Add realistic achievements or project improvements (e.g., "Implemented firewall rules", "Wrote bash scripts for log parsing").
+- ⚠️ Do NOT invent new employers or employment history.
+- 🔒 Focus on **skills**, **methods**, **mindsets**, and **tools** mentioned in the job post.
+- ✨ Keep the language **concise, technical, and HR-friendly**.
 
-🔍 INSTRUCTIONS:
-1. Rewrite the CV in the exact JSON format provided below.
-2. DO NOT invent fake experience or job history.
-3. You may **adjust wording and expand existing achievements**, projects, or skills to reflect **relevant tools and security practices** (e.g., “applied vulnerability scanning”, “followed NIST guidelines”, etc.)
-4. Add certifications *only* if **commonly self-learned or entry-level** (e.g., CEH, OSCP if plausible).
-5. Emphasize transferable skills like problem-solving, attention to detail, cloud awareness, scripting, or knowledge of protocols, even if not explicitly in the original CV.
-6. Rewrite `aboutMe`, `experience`, `projects`, and `skills` adding to the already existing text information to sound like the applicant aligns with the role.
-7. Use a **professional, concise tone**. Stay within 1024 tokens.
-
-Return ONLY a clean and valid JSON object with this schema:
-
+📦 **REQUIRED OUTPUT FORMAT (JSON)**:
 {
   "name": "Full Name",
   "email": "email@example.com",
@@ -55,15 +56,15 @@ Return ONLY a clean and valid JSON object with this schema:
   "portfolio": "https://portfolio.com",
   "linkedin": "https://linkedin.com/in/username",
   "github": "https://github.com/username",
-  "aboutMe": "Tailored summary highlighting cybersecurity relevance",
-  "skills": ["Skill1", "Skill2", "..."],
+  "aboutMe": "Updated summary emphasizing cybersecurity capabilities and goals",
+  "skills": ["SIEM", "Python", "Incident Response", "Risk Analysis", "NIST"],
   "experience": [
     {
       "company": "Company Name",
       "role": "Job Title",
-      "duration": "Jan 2020 - Dec 2022",
-      "achievements": ["Achievement 1", "Achievement 2"],
-      "techStack": ["Tool1", "Tool2"]
+      "duration": "Jan 2021 - Present",
+      "achievements": ["Implemented log monitoring using ELK", "Wrote scripts to automate alert triage"],
+      "techStack": ["Splunk", "Python", "Firewalls", "Linux"]
     }
   ],
   "education": [
@@ -77,29 +78,29 @@ Return ONLY a clean and valid JSON object with this schema:
   ],
   "projects": [
     {
-      "title": "Project Name",
-      "description": "Updated description to reflect job-related work",
-      "techStack": ["Tech1", "Tech2"],
-      "link": "https://github.com/project"
+      "title": "Secure File Transfer System",
+      "description": "Developed a secure file-sharing system with encryption and user authentication",
+      "techStack": ["Python", "OpenSSL", "JWT"],
+      "link": "https://github.com/secure-transfer"
     }
   ],
   "certifications": [
     {
-      "title": "Certification Name",
-      "issuer": "Organization",
+      "title": "CompTIA Security+",
+      "issuer": "CompTIA",
       "year": "2023"
     }
   ],
   "languages": ["English", "French"],
-  "interests": ["Reading", "Hiking"],
-  "socialClubs": ["Robotics Club"]
+  "interests": ["Capture The Flag", "Cyber News", "Penetration Testing"],
+  "socialClubs": ["Cybersecurity Club"]
 }
 """.formatted(cvText, jobDescription);
 
         OllamaOptions options = new OllamaOptions();
         options.setModel("llama3");
-        options.setTemperature(0.7); // balanced creativity
-        options.setNumPredict(1536); // allow longer tailoring
+        options.setTemperature(0.6); // balanced creativity
+        options.setNumPredict(1536); // allow longer structured response
 
         ChatResponse response = chatModel.call(new Prompt(prompt, options));
 

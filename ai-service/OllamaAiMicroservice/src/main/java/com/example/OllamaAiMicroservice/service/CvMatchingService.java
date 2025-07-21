@@ -1,4 +1,3 @@
-// File: CvMatchingService.java
 package com.example.OllamaAiMicroservice.service;
 
 import com.example.OllamaAiMicroservice.dto.CvMatchResult;
@@ -39,7 +38,8 @@ public class CvMatchingService {
         } else if (common.isEmpty()) {
             explanation = "No overlapping skills were found between CV and job description.";
         } else {
-            explanation = String.format("%d out of %d required skills matched (%.2f%%).", common.size(), jobSkills.size(), similarity);
+            explanation = String.format("%d out of %d required skills matched (%.2f%%).",
+                    common.size(), jobSkills.size(), similarity);
         }
 
         CvMatchResult result = new CvMatchResult();
@@ -54,14 +54,16 @@ public class CvMatchingService {
 
     private Set<String> extractSkills(String text) {
         String prompt = """
-        You are a CV/job description parser.
+        You are a professional CV/job description parser.
 
-        Extract all technical and soft skills, tools, certifications, and technologies from the text below.
-        Respond ONLY with a JSON array of strings (no explanation).
+        Extract all *technical and soft skills*, *tools*, *certifications*, and *technologies* from the text below.
+
+        ⚠️ Return ONLY a valid JSON array of strings. Do NOT include any explanation, markdown, or preamble.
 
         Example:
         ["Java", "Python", "Teamwork", "AWS", "Git", "Communication"]
 
+        Text to extract from:
         ---
         %s
         ---
@@ -74,9 +76,21 @@ public class CvMatchingService {
         ChatResponse response = chatModel.call(new Prompt(prompt, options));
 
         try {
-            String content = response.getResult().getOutput().getText();
-            JsonNode arrayNode = objectMapper.readTree(content);
+            String content = response.getResult().getOutput().getText().trim();
 
+            System.out.println("🧠 Raw response from Ollama:\n" + content);
+
+            // Extract the JSON array (even if surrounded by extra text)
+            int startIdx = content.indexOf("[");
+            int endIdx = content.lastIndexOf("]");
+
+            if (startIdx == -1 || endIdx == -1 || endIdx <= startIdx) {
+                throw new RuntimeException("❌ No valid JSON array found in response: " + content);
+            }
+
+            String jsonArray = content.substring(startIdx, endIdx + 1);
+
+            JsonNode arrayNode = objectMapper.readTree(jsonArray);
             Set<String> skills = new HashSet<>();
             if (arrayNode.isArray()) {
                 for (JsonNode node : arrayNode) {
@@ -84,8 +98,9 @@ public class CvMatchingService {
                 }
             }
             return skills;
+
         } catch (Exception e) {
-            throw new RuntimeException("Failed to extract skills from text", e);
+            throw new RuntimeException("❌ Failed to extract skills from text.\nCheck Ollama output format.", e);
         }
     }
 }
