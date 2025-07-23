@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import Navbar from '../components/navbar';
+import Navbar from '../components/UserNavbar';
 import PersonalInfoForm from '../components/build-resume/personal-info-form';
 import ExperienceForm from '../components/build-resume/experience-form';
 import EducationForm from '../components/build-resume/education-form';

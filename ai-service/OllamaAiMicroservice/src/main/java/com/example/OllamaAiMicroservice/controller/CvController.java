@@ -5,17 +5,22 @@ import com.example.OllamaAiMicroservice.dto.BuildRequestDto;
 import com.example.OllamaAiMicroservice.entity.CvEntity;
 import com.example.OllamaAiMicroservice.dto.CvAnalysisResult;
 import com.example.OllamaAiMicroservice.dto.CvMatchResult;
+import com.example.OllamaAiMicroservice.entity.FeatureUsage;
 import com.example.OllamaAiMicroservice.service.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cv")
@@ -37,6 +42,33 @@ public class CvController {
     @Autowired
     private BuildService buildService;
 
+    @Autowired
+    private FeatureUsageService featureUsageService;
+
+
+    @GetMapping("/all-cvs")
+    public ResponseEntity<List<CvEntity>> getAllCvs() {
+        List<CvEntity> cvs = cvRepository.findAll();
+        return ResponseEntity.ok(cvs);
+    }
+    @GetMapping("/my-cvs")
+    public ResponseEntity<List<CvEntity>> getCurrentUserCvs(Authentication authentication) {
+        // Get userSub from Spring Security context
+        String userSub = authentication.getName();
+
+        List<CvEntity> cvs = cvRepository.findByUserSub(userSub);
+        return ResponseEntity.ok(cvs);
+    }
+    @GetMapping("/user-cvs/{userSub}")
+    public ResponseEntity<List<CvEntity>> getCvsByUserSub(@PathVariable String userSub) {
+        String cleanedUserSub = userSub.trim().replaceAll("[{}]", "");
+        System.out.println("Cleaned userSub: '" + cleanedUserSub + "'");
+        List<CvEntity> cvs = cvRepository.findByUserSub(cleanedUserSub);
+        System.out.println("Found CVs count: " + cvs.size());
+        return ResponseEntity.ok(cvs);
+    }
+
+
     // 🔍 Analyze CV using AI
     @PostMapping("/analyze")
     public ResponseEntity<CvAnalysisResult> analyzeCv(
@@ -46,7 +78,7 @@ public class CvController {
         try {
             String cvText = fileParserService.parseFile(cvFile);
             CvAnalysisResult result = cvAnalysisService.analyzeCV(cvText);
-            // You may optionally link the result to userSub if needed
+            featureUsageService.log("analyze", userSub);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,6 +92,8 @@ public class CvController {
             @RequestBody BuildRequestDto dto,
             @RequestHeader("X-User-Sub") String userSub
     ) {
+        featureUsageService.log("Creation", userSub);
+
         // TODO: optionally set userSub in the dto or CvEntity here
         CvEntity saved = buildService.save(dto, userSub);
         return ResponseEntity.ok(saved);
@@ -73,6 +107,8 @@ public class CvController {
             @RequestHeader("X-User-Sub") String userSub
     ) {
         try {
+            featureUsageService.log("match", userSub);
+
             String cvText = fileParserService.parseFile(cvFile);
             CvMatchResult result = cvMatchingService.matchCvToJob(cvText, jobDescription);
             return ResponseEntity.ok(result);
@@ -89,6 +125,8 @@ public class CvController {
             @RequestHeader("X-User-Sub") String userSub
     ) {
         try {
+            featureUsageService.log("review", userSub);
+
             String cvText = fileParserService.parseFile(cvFile);
             String feedback = cvFeedbackService.generateFeedback(cvText);
             return ResponseEntity.ok(feedback);
@@ -104,6 +142,8 @@ public class CvController {
             @RequestHeader("X-User-Sub") String userSub
     ) {
         try {
+            featureUsageService.log("improve", userSub);
+
             String cvText = extractTextFromPdf(file.getInputStream());
             CvAnalysisResult improvedCv = improvementService.improveCv(cvText);
             return ResponseEntity.ok(improvedCv);
@@ -120,6 +160,8 @@ public class CvController {
             @RequestHeader("X-User-Sub") String userSub
     ) {
         try {
+            featureUsageService.log("tailor", userSub);
+
             String cvText = extractTextFromPdf(file.getInputStream());
             CvAnalysisResult tailoredResult = tailoringService.tailorCvToJob(cvText, jobDescription);
             return ResponseEntity.ok(tailoredResult);
@@ -150,9 +192,23 @@ public class CvController {
         }
     }
 
-    @GetMapping("/my-cvs")
-    public ResponseEntity<List<CvEntity>> getUserCvs(@RequestHeader("X-User-Sub") String userSub) {
+    @GetMapping("/users/{userSub}/cvs") // Different URL pattern
+    @PreAuthorize("hasRole('ADMIN')") // Restrict to admin
+    public ResponseEntity<List<CvEntity>> getCvsByUserSubAdmin(
+            @PathVariable String userSub
+    ) {
+        // No cleaning needed if using proper UUIDs
         return ResponseEntity.ok(cvRepository.findByUserSub(userSub));
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/usage-stats")
+    public ResponseEntity<Map<String, Long>> getUsageStats() {
+        List<FeatureUsage> allUsage = featureUsageService.findAll();
+        Map<String, Long> stats = allUsage.stream()
+                .collect(Collectors.groupingBy(FeatureUsage::getFeatureName, Collectors.counting()));
+        return ResponseEntity.ok(stats);
+    }
+
 
 }

@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 
 const axiosInstance = axios.create({
@@ -6,6 +5,7 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
+// Request interceptor
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -13,5 +13,18 @@ axiosInstance.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Response interceptor
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userRole');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default axiosInstance;

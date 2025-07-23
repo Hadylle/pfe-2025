@@ -49,6 +49,11 @@ public class UserService implements UserDetailsService {
         this.jwtUtils = jwtUtils;
         this.cloudinaryService = cloudinaryService;
     }
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+
 
     public ResponseEntity<?> authenticateUser(LoginRequest loginRequest, AuthenticationManager authenticationManager) {
         try {
@@ -152,9 +157,6 @@ public class UserService implements UserDetailsService {
         return optionalUser.get();
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
 
     public User getUserByEmail(String email) {
         Optional<User> user = userRepository.findByEmail(email);

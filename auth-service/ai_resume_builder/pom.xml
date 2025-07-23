@@ -73,6 +73,11 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>6.6.5.Final</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.javafaker</groupId>
+			<artifactId>javafaker</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 
 		<!-- JWT Library -->
 		<dependency>

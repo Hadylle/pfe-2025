@@ -1,5 +1,6 @@
 package com.example.ai_resume_builder.controller;
 
+import com.example.ai_resume_builder.model.User;
 import com.example.ai_resume_builder.request.LoginRequest;
 import com.example.ai_resume_builder.request.SignupRequest;
 import com.example.ai_resume_builder.request.TokenRefreshRequest;
@@ -10,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,4 +40,10 @@ public class AuthenticationController {
     public ResponseEntity<JwtResponse> refreshToken(@Valid @RequestBody TokenRefreshRequest request) throws Exception {
         return userService.refreshToken(request);
     }
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+
 }

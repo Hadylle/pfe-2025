@@ -1,9 +1,12 @@
+// UserNavbar.jsx
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { UserCircleIcon } from '@heroicons/react/24/solid'; // 👈 import Heroicon
+import { UserCircleIcon } from '@heroicons/react/24/solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBriefcase } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../context/AuthContext';
+
 const routeColors = {
   '/analyze': '#0091e3',
   '/improve': '#0091e3',
@@ -16,13 +19,18 @@ const routeColors = {
   '/': '#0091e3'
 };
 
-const Navbar = () => {
+const UserNavbar = () => {
   const location = useLocation();
   const [bgColor, setBgColor] = useState(routeColors['/']);
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     setBgColor(routeColors[location.pathname] || '#3B82F6');
   }, [location.pathname]);
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <motion.nav
@@ -32,32 +40,43 @@ const Navbar = () => {
     >
       <div className="max-w-full mx-auto">
         <div className="flex justify-between h-20 items-center">
-          
-          {/* Logo */}
-<div className="flex items-center space-x-2">
-  <Link to="/" className="text-2xl font-bold flex items-center">
-<FontAwesomeIcon icon={faBriefcase} style={{color: "#ffffff",}} />
-    <span className="hover:text-[#F3F4F6] transition-colors">HireMatch</span>
-  </Link>
-</div>
 
+          {/* Logo */}
+          <div className="flex items-center space-x-2">
+            <Link to="/" className="text-2xl font-bold flex items-center">
+              <FontAwesomeIcon icon={faBriefcase} style={{ color: "#ffffff" }} />
+              <span className="hover:text-[#F3F4F6] transition-colors">HireMatch</span>
+            </Link>
+          </div>
 
           {/* Nav Items */}
           <div className="hidden md:flex items-center space-x-5 text-base font-medium">
             <Link to="/build" className="hover:text-[#F3F4F6] transition-colors px-2 py-1">Build CV</Link>
             <Link to="/match" className="hover:text-[#F3F4F6] transition-colors px-2 py-1">Match</Link>
-            <Link to="/improve" className="hover:text-[#F3F4F6] transition-colors px-2 py-1">Improve cv</Link>
+            <Link to="/improve" className="hover:text-[#F3F4F6] transition-colors px-2 py-1">Improve CV</Link>
             <Link to="/tailor" className="hover:text-[#F3F4F6] transition-colors px-2 py-1">Tailor</Link>
             <Link to="/feedback" className="hover:text-[#F3F4F6] transition-colors px-2 py-1">Feedback</Link>
           </div>
 
           {/* Auth + Profile Icon */}
           <div className="flex items-center space-x-4">
-            <Link to="/login" className="text-base font-medium hover:text-[#F3F4F6] transition-colors">
-              Sign In
-            </Link>
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="text-base font-medium hover:text-[#F3F4F6] transition-colors"
+              >
+                Log Out
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="text-base font-medium hover:text-[#F3F4F6] transition-colors"
+              >
+                Sign In
+              </Link>
+            )}
 
-            {/* Profile Icon Button */}
+            {/* Profile Icon */}
             <Link to="/profile">
               <motion.div
                 whileHover={{ scale: 1.1 }}
@@ -75,4 +94,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default UserNavbar;

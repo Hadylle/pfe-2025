@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import robotAnimation from '../assets/robot.json';
 
-import Navbar from '../components/navbar';
+import Navbar from '../components/UserNavbar';
 import Footer from '../components/footer';
 
 import LottieHeader from '../components/features/LottieHeader';

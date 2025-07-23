@@ -1,9 +1,11 @@
+// src/pages/SigninSignup.js
 import { useState } from 'react';
 import { useSignIn, useSignUp } from '../api/useAuth';
 import { useNavigate } from 'react-router-dom';
 import Lottie from 'lottie-react';
 import cvAnimation from '../assets/cvAnimation.json';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 const SignInSignUpPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -14,8 +16,9 @@ const SignInSignUpPage = () => {
     firstName: '',
     lastName: '',
   });
-
+  const [slide, setSlide] = useState(0);
   const navigate = useNavigate();
+ const { login } = useAuth();
 
   const signInMutation = useSignIn();
   const signUpMutation = useSignUp();
@@ -49,11 +52,11 @@ const SignInSignUpPage = () => {
     mutation.mutate(payload, {
       onSuccess: (data) => {
         console.log('✅ Auth success', data);
-        navigate('/home'); // token is already handled in the hook
-      },
+   login(data.token, data.role);
+  navigate(data.role === 'ADMIN' ? '/' : '/');      },
       onError: (error) => {
         console.error('❌ Auth error:', error.response?.data || error.message);
-        alert("Authentication failed.");
+        alert(error.response?.data?.message || "Authentication failed.");
       },
     });
   };
@@ -64,11 +67,9 @@ const SignInSignUpPage = () => {
     { title: "PDF Export", desc: "Download polished, ATS-ready CVs" },
   ];
 
-  const [slide, setSlide] = useState(0);
-
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white">
-      {/* Left */}
+      {/* Left Section */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
@@ -93,7 +94,7 @@ const SignInSignUpPage = () => {
         </div>
       </motion.div>
 
-      {/* Right */}
+      {/* Right Section - Form */}
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
@@ -105,51 +106,105 @@ const SignInSignUpPage = () => {
             {isSignUp ? "Sign Up to CVAI" : "Welcome Back"}
           </h3>
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             {isSignUp && (
-              <>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">First Name</label>
-                  <input name="firstName" type="text" value={formData.firstName} onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <input
+                    name="firstName"
+                    type="text"
+                    required
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                  <input name="lastName" type="text" value={formData.lastName} onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <input
+                    name="lastName"
+                    type="text"
+                    required
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
-              </>
-            )}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input name="email" type="email" value={formData.email} onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <input name="password" type="password" value={formData.password} onChange={handleChange}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            {isSignUp && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
-                <input name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange}
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
             )}
-            <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
-              {isSignUp ? "Create Account" : "Login"}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                name="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input
+                name="password"
+                type="password"
+                required
+                minLength={6}
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {isSignUp && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                <input
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  minLength={6}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={signInMutation.isLoading || signUpMutation.isLoading}
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-70"
+            >
+              {isSignUp 
+                ? (signUpMutation.isLoading ? 'Creating Account...' : 'Sign Up')
+                : (signInMutation.isLoading ? 'Signing In...' : 'Sign In')}
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-600">
             {isSignUp ? (
-              <>Already have an account?{" "}
-                <button onClick={() => setIsSignUp(false)} className="text-blue-600 font-medium underline">Sign In</button>
+              <>
+                Already have an account?{' '}
+                <button
+                  onClick={() => setIsSignUp(false)}
+                  className="text-blue-600 font-medium hover:underline"
+                >
+                  Sign In
+                </button>
               </>
             ) : (
-              <>Don’t have an account?{" "}
-                <button onClick={() => setIsSignUp(true)} className="text-blue-600 font-medium underline">Sign Up</button>
+              <>
+                Don't have an account?{' '}
+                <button
+                  onClick={() => setIsSignUp(true)}
+                  className="text-blue-600 font-medium hover:underline"
+                >
+                  Sign Up
+                </button>
               </>
             )}
           </div>

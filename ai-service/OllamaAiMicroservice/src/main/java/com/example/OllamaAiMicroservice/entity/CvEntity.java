@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "cv_entity")
 public class CvEntity {
 
     @Id
@@ -17,7 +18,7 @@ public class CvEntity {
     private Long id;
 
     // 🔑 Add this to link CVs to users
-    @Column(nullable = false)
+    @Column(nullable = false, name = "user_sub")
     private String userSub;
 
     @Column(length = 255)

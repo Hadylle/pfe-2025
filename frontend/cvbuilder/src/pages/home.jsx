@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from '../components/navbar';
+import Navbar from '../components/UserNavbar';
 import HeroSection from '../components/Home/hero-section';
 import TemplatesSection from '../components/Home/template-showcase';
 import CVPreview from '../components/Home/cv-preview';
