@@ -8,8 +8,13 @@ const axiosInstance = axios.create({
 // Request interceptor
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
+  const userSub = localStorage.getItem('userSub');
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+    if (userSub) {
+    config.headers['X-User-Sub'] = userSub;
   }
   return config;
 });

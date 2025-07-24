@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useResumeStore } from '../../store/resume-store';
 import { useForm } from 'react-hook-form';
 import { useDebounce } from 'use-debounce';
 import { FormContainer } from './ReusableComponents/FormContainer';
+import { uploadProfilePicture, getProfilePicture } from '../../api/photo-api';
 
 export default function PersonalInfoForm() {
   const { resumeData, updateField } = useResumeStore();
-  const [photoPreview, setPhotoPreview] = useState(resumeData.photo || '');
+  const [photoPreview, setPhotoPreview] = useState('');
+  const [isLoadingPhoto, setIsLoadingPhoto] = useState(false);
 
   const { register, watch } = useForm({
     defaultValues: {
@@ -25,7 +27,36 @@ export default function PersonalInfoForm() {
   const watchedFormData = watch();
   const [formData] = useDebounce(watchedFormData, 300);
 
-  React.useEffect(() => {
+  // Load existing profile picture on component mount
+  useEffect(() => {
+    const loadExistingPhoto = async () => {
+      const userSub = localStorage.getItem('userSub');
+      const cvId = resumeData.id;
+      
+      if (userSub && cvId) {
+        setIsLoadingPhoto(true);
+        try {
+          const imageUrl = await getProfilePicture(userSub, cvId);
+          if (imageUrl) {
+            setPhotoPreview(imageUrl);
+            updateField('photo', imageUrl);
+          }
+        } catch (error) {
+          console.error('Failed to load existing photo:', error);
+        } finally {
+          setIsLoadingPhoto(false);
+        }
+      }
+    };
+
+    // Only load if we don't already have a photo preview
+    if (!photoPreview && resumeData.id) {
+      loadExistingPhoto();
+    }
+  }, [resumeData.id, updateField]);
+
+  // Handle form data changes
+  useEffect(() => {
     Object.entries(formData).forEach(([field, value]) => {
       if (resumeData[field] !== value) {
         updateField(field, value);
@@ -33,22 +64,58 @@ export default function PersonalInfoForm() {
     });
   }, [formData, resumeData, updateField]);
 
-  const handlePhotoChange = (e) => {
+  const handlePhotoChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result);
-        updateField('photo', reader.result);
-      };
-      reader.readAsDataURL(file);
+      try {
+        setIsLoadingPhoto(true);
+        const userSub = localStorage.getItem('userSub');
+        const cvId = resumeData.id;
+        
+        const updatedCv = await uploadProfilePicture(file, userSub, cvId);
+        
+        // If the backend returns the full CV object with photo URL
+        if (updatedCv.profilePictureUrl) {
+          setPhotoPreview(updatedCv.profilePictureUrl);
+          updateField('photo', updatedCv.profilePictureUrl);
+        } else {
+          // Fallback: fetch the photo again to get the URL
+          const imageUrl = await getProfilePicture(userSub, cvId);
+          if (imageUrl) {
+            setPhotoPreview(imageUrl);
+            updateField('photo', imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error('Upload failed:', error);
+        alert('Failed to upload photo. Please try again.');
+      } finally {
+        setIsLoadingPhoto(false);
+      }
     }
   };
 
-  const removePhoto = () => {
+  const removePhoto = async () => {
+    // Clean up blob URL if it exists
+    if (photoPreview && photoPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(photoPreview);
+    }
+    
     setPhotoPreview('');
     updateField('photo', '');
+    
+    // Note: You might want to add a delete endpoint to actually remove 
+    // the photo from Cloudinary and database
   };
+
+  // Clean up blob URLs on component unmount
+  useEffect(() => {
+    return () => {
+      if (photoPreview && photoPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, []);
 
   return (
     <FormContainer title="Personal Information">
@@ -59,13 +126,15 @@ export default function PersonalInfoForm() {
           <div className="flex items-center gap-4">
             <div className="relative">
               <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                {photoPreview ? (
+                {isLoadingPhoto ? (
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                ) : photoPreview ? (
                   <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-3xl text-gray-500">👤</span>
                 )}
               </div>
-              {photoPreview && (
+              {photoPreview && !isLoadingPhoto && (
                 <button
                   type="button"
                   onClick={removePhoto}
@@ -84,12 +153,17 @@ export default function PersonalInfoForm() {
                 accept="image/*"
                 onChange={handlePhotoChange}
                 className="hidden"
+                disabled={isLoadingPhoto}
               />
               <label
                 htmlFor="photo-upload"
-                className="cursor-pointer block w-full px-4 py-2 text-sm font-medium text-center text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 border border-blue-200"
+                className={`cursor-pointer block w-full px-4 py-2 text-sm font-medium text-center rounded-md border ${
+                  isLoadingPhoto 
+                    ? 'text-gray-400 bg-gray-50 border-gray-200 cursor-not-allowed' 
+                    : 'text-blue-700 bg-blue-50 hover:bg-blue-100 border-blue-200'
+                }`}
               >
-                {photoPreview ? 'Change Photo' : 'Upload Photo'}
+                {isLoadingPhoto ? 'Processing...' : photoPreview ? 'Change Photo' : 'Upload Photo'}
               </label>
               <p className="text-xs text-gray-500 mt-1">Square images work best (max 2MB)</p>
             </div>

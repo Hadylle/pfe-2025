@@ -62,7 +62,6 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-          <Footer />
         </>
       )}
     </Router>

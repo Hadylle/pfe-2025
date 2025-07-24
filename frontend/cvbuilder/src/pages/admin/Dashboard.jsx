@@ -1,5 +1,5 @@
 import StatsCard from '../../components/dashboard/StatsCard';
-import useFetch from '../../api/hooks/useFetch';
+import useFetch from '../../hooks/useFetch';
 import Analytics from './Analytics';
 import PieChart from '../../components/dashboard/PieChart';
 import Lottie from "lottie-react";

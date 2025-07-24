@@ -1,14 +1,17 @@
-// components/resume/TemplateWrapper.js
 import { useResumeStore } from '../../store/resume-store';
-import { languages} from './languages';
-import  ModernTemplate  from './templates/modern';
-import  ClassicTemplate  from './templates/classic';
-import { useState } from 'react';
+import { languages } from './languages';
+import ModernTemplate from './templates/modern';
+import ClassicTemplate from './templates/classic';
 import { colorPalettes } from './colorPalette';
+
 const TemplateWrapper = ({ data }) => {
-  const { selectedTemplate } = useResumeStore();
-  const [language, setLanguage] = useState('en');
-  const [colorScheme, setColorScheme] = useState('default');
+  const {
+    selectedTemplate,
+    selectedLanguage,
+    selectedColorScheme,
+    setSelectedLanguage,
+    setSelectedColorScheme,
+  } = useResumeStore();
 
   const TemplateComponent = selectedTemplate === 'modern' ? ModernTemplate : ClassicTemplate;
 
@@ -18,8 +21,8 @@ const TemplateWrapper = ({ data }) => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
           <select 
-            value={language} 
-            onChange={(e) => setLanguage(e.target.value)}
+            value={selectedLanguage} 
+            onChange={(e) => setSelectedLanguage(e.target.value)}
             className="p-2 border rounded-md text-sm w-full"
           >
             {Object.keys(languages).map((lang) => (
@@ -33,8 +36,8 @@ const TemplateWrapper = ({ data }) => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Color Scheme</label>
           <select
-            value={colorScheme}
-            onChange={(e) => setColorScheme(e.target.value)}
+            value={selectedColorScheme}
+            onChange={(e) => setSelectedColorScheme(e.target.value)}
             className="p-2 border rounded-md text-sm w-full"
           >
             {Object.keys(colorPalettes).map((scheme) => (
@@ -48,10 +51,11 @@ const TemplateWrapper = ({ data }) => {
 
       <TemplateComponent 
         data={data} 
-        language={language} 
-        colorScheme={colorScheme} 
+        language={selectedLanguage} 
+        colorScheme={selectedColorScheme} 
       />
     </div>
   );
 };
-export default TemplateWrapper
+
+export default TemplateWrapper;

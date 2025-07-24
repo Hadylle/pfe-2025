@@ -8,7 +8,6 @@ const ModernTemplate = ({
   language = 'en',
   colorScheme = 'default'
 }) => {
-  // Safely extract data with fallbacks
   const {
     name = "Your Name",
     role = "",
@@ -41,24 +40,25 @@ const ModernTemplate = ({
             <PhotoComponent photo={photo} name={name} />
             
             <div className="flex-1">
-              <h1 className={`text-4xl font-bold uppercase tracking-wide ${getColor('header')}`}>
+              <h1 className={`text-4xl font-bold uppercase tracking-wide ${colors.primary}`}>
                 {name}
               </h1>
               {role && (
-                <h2 className={`text-2xl ${getColor('sub-header')} font-semibold mb-4`}>
+                <h2 className={`text-2xl ${colors.accent} font-semibold mb-4`}>
                   {role}
                 </h2>
               )}
               
               {/* About Me */}
               {aboutMe && renderSection('aboutMe', 
-                <p className={`text-${colors.text}-700 mb-6 leading-relaxed`}>{aboutMe}</p>
+                <p className={`${colors.text} mb-6 leading-relaxed`}>{aboutMe}</p>
               )}
 
               {/* Contact Information */}
-              <div className={`flex flex-wrap gap-4 text-sm border-t-2 border-b-2 ${getColor('section-header')} py-4 mb-6`}>
+              <div className={`flex flex-wrap gap-4 text-sm border-t-2 border-b-2 ${colors.primary} py-4 mb-6`}>
                 {email && (
                   <div className="flex items-center">
+                    {/* email icon */}
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
@@ -68,6 +68,7 @@ const ModernTemplate = ({
                 
                 {phone && (
                   <div className="flex items-center">
+                    {/* phone icon */}
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                     </svg>
@@ -77,6 +78,7 @@ const ModernTemplate = ({
                 
                 {website && (
                   <div className="flex items-center">
+                    {/* website icon */}
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                     </svg>
@@ -86,6 +88,7 @@ const ModernTemplate = ({
                 
                 {location && (
                   <div className="flex items-center">
+                    {/* location icon */}
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -107,10 +110,10 @@ const ModernTemplate = ({
                   {education.map((edu, i) => (
                     <div key={i}>
                       <h3 className="font-bold">{edu.degree || sectionHeaders.degree}</h3>
-                      <p className={`text-${colors.text}-700 italic`}>
+                      <p className={`${colors.text} italic`}>
                         {edu.institution || sectionHeaders.institution}
                       </p>
-                      <p className={`text-${colors.text}-600 text-sm`}>
+                      <p className={`${colors.text} text-sm`}>
                         {edu.duration || `${edu.startDate} ${edu.endDate ? `- ${edu.endDate}` : ''}`}
                       </p>
                     </div>
@@ -155,15 +158,15 @@ const ModernTemplate = ({
               {experience.length > 0 && renderSection('experience',
                 <div className="space-y-6">
                   {experience.map((exp, i) => (
-                    <div key={i} className={`border-l-2 ${getColor('accent')} pl-4`}>
+                    <div key={i} className={`border-l-2 ${colors.accent} pl-4`}>
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="font-bold text-lg">{exp.role}</h3>
-                          <p className={`text-${colors.text}-700 font-medium`}>
+                          <p className={`${colors.text} font-medium`}>
                             {exp.company}
                           </p>
                         </div>
-                        <span className={`text-${colors.text}-600 text-sm whitespace-nowrap`}>
+                        <span className={`${colors.text} text-sm whitespace-nowrap`}>
                           {exp.duration}
                         </span>
                       </div>
@@ -180,14 +183,14 @@ const ModernTemplate = ({
                   {expertise.map((exp, i) => (
                     <li key={i} className="flex items-start">
                       <svg 
-                        className={`w-4 h-4 mt-1 mr-2 ${getColor('accent')} flex-shrink-0`} 
+                        className={`w-4 h-4 mt-1 mr-2 ${colors.accent} flex-shrink-0`} 
                         fill="none" 
                         stroke="currentColor" 
                         viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
                       </svg>
-                      <span className={`text-${colors.text}-700`}>{exp}</span>
+                      <span className={colors.text}>{exp}</span>
                     </li>
                   ))}
                 </ul>
@@ -199,4 +202,5 @@ const ModernTemplate = ({
     </BaseTemplate>
   );
 };
-export default ModernTemplate
+
+export default ModernTemplate;

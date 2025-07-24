@@ -1,5 +1,4 @@
 import { BaseTemplate } from './BaseTemplate';
-import PhotoComponent from '../PhotoComponent';
 import { languages } from '../languages';
 import { colorPalettes } from '../colorPalette';
 
@@ -23,7 +22,7 @@ const ClassicTemplate = ({
 
           {/* About Me */}
           {data.aboutMe && renderSection('aboutMe', 
-            <p className={`text-${colors.text}-700`}>{data.aboutMe}</p>
+            <p className={colors.text}>{data.aboutMe}</p>
           )}
 
           {/* Experience */}
@@ -32,9 +31,9 @@ const ClassicTemplate = ({
               <div key={i} className="mb-4">
                 <div className="flex justify-between">
                   <h3 className="font-bold">{exp.role}</h3>
-                  <span className={`text-${colors.text}-600`}>{exp.duration}</span>
+                  <span className={colors.text}>{exp.duration}</span>
                 </div>
-                <h4 className={`text-${colors.text}-700`}>{exp.company}</h4>
+                <h4 className={colors.text}>{exp.company}</h4>
                 {exp.achievements?.length > 0 && renderListItem(exp.achievements)}
               </div>
             ))
@@ -45,10 +44,10 @@ const ClassicTemplate = ({
             data.education.map((edu, i) => (
               <div key={i} className="mb-4">
                 <h3 className="font-bold">{edu.institution}</h3>
-                <p className={`text-${colors.text}-700`}>
+                <p className={colors.text}>
                   {edu.degree} - {edu.field}
                 </p>
-                <p className={`text-${colors.text}-600`}>
+                <p className={`${colors.text} text-sm`}>
                   {edu.startDate} - {edu.endDate}
                 </p>
               </div>
@@ -61,7 +60,7 @@ const ClassicTemplate = ({
               {data.skills.map((skill, i) => (
                 <li
                   key={i}
-                  className={`px-2 py-1 rounded text-sm ${getColor('accent')}`}
+                  className={`px-2 py-1 rounded text-sm ${colors.accent}`}
                 >
                   {skill.value}
                 </li>
@@ -74,19 +73,19 @@ const ClassicTemplate = ({
             data.projects.map((proj, i) => (
               <div key={i} className="mb-4">
                 <h3 className="font-bold">{proj.title}</h3>
-                <p className={`text-${colors.text}-700`}>{proj.description}</p>
+                <p className={colors.text}>{proj.description}</p>
                 {proj.link && (
                   <a
                     href={proj.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`text-${colors.primary}-600 underline`}
+                    className={`${colors.primary} underline`}
                   >
                     {sectionHeaders.projectLink || 'Project Link'}
                   </a>
                 )}
                 {proj.techStack?.length > 0 && (
-                  <p className={`mt-1 text-sm text-${colors.text}-600`}>
+                  <p className={`mt-1 text-sm ${colors.text}`}>
                     {sectionHeaders.techStack || 'Tech Stack'}: {proj.techStack.join(', ')}
                   </p>
                 )}
@@ -99,7 +98,7 @@ const ClassicTemplate = ({
             data.certifications.map((cert, i) => (
               <div key={i} className="mb-4">
                 <h3 className="font-bold">{cert.title}</h3>
-                <p className={`text-${colors.text}-700`}>
+                <p className={colors.text}>
                   {cert.issuer} - {cert.year}
                 </p>
               </div>
@@ -125,4 +124,5 @@ const ClassicTemplate = ({
     </BaseTemplate>
   );
 };
-export default ClassicTemplate
+
+export default ClassicTemplate;

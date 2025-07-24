@@ -30,7 +30,7 @@ export const languages = {
     level: 'Level'
   },
   fr: {
-    aboutMe: 'Profil',
+    aboutMe: 'Profile',
     experience: 'Expérience Professionnelle',
     education: 'Formation',
     skills: 'Compétences',

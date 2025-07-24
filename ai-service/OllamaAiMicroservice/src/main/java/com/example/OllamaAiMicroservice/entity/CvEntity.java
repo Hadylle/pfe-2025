@@ -27,6 +27,9 @@ public class CvEntity {
     @Column(length = 255)
     private String email;
 
+    @Column(name = "profile_picture_url")
+    private String profilePictureUrl;
+
     @Column(length = 255)
     private String phone;
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import useFetch from '../../api/hooks/useFetch';
+import useFetch from '../../hooks/useFetch';
 import UserRow from '../../components/dashboard/UserRow';
 import UserDetailsModal from '../../components/dashboard/UserDetailsModal';
 

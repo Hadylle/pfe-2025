@@ -17,34 +17,28 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cv")
 @RequiredArgsConstructor
 public class CvController {
-
     private final FileParserService fileParserService;
     private final CvAnalysisService cvAnalysisService;
     private final CvMatchingService cvMatchingService;
     private final CvFeedbackService cvFeedbackService;
     private final CvStorageService cvStorageService;
     private final CvTailoredImprovementService tailoringService;
-    @Autowired
+    private final CloudinaryService cloudinaryService;
     private final CvRepository cvRepository;
-
-    @Autowired
     private CvImprovementService improvementService;
-
-    @Autowired
     private BuildService buildService;
-
-    @Autowired
     private FeatureUsageService featureUsageService;
-
 
     @GetMapping("/all-cvs")
     public ResponseEntity<List<CvEntity>> getAllCvs() {
@@ -211,4 +205,60 @@ public class CvController {
     }
 
 
+    @PostMapping("/{userSub}/{cvId}/upload-picture")
+    public ResponseEntity<?> uploadProfilePicture(
+            @PathVariable String userSub,
+            @PathVariable Long cvId,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            Optional<CvEntity> updatedCv = cloudinaryService.uploadProfilePictureAndSave(file, userSub, cvId);
+            return updatedCv
+                    .map(cv -> ResponseEntity.ok().body(cv))
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Upload failed");
+        }
+    }
+
+
+
+    @GetMapping("/{userSub}/{cvId}/profile-picture")
+    public ResponseEntity<?> getProfilePictureByUserSubAndCvId(
+            @PathVariable String userSub,
+            @PathVariable Long cvId
+    ) {
+        Optional<CvEntity> cvOptional = cvRepository.findByIdAndUserSub(cvId, userSub);
+
+        if (cvOptional.isPresent()) {
+            CvEntity cv = cvOptional.get();
+            String imageUrl = cv.getProfilePictureUrl();
+
+            if (imageUrl == null || imageUrl.isBlank()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No profile picture found.");
+            }
+
+            try {
+                // Fetch the image bytes from the URL
+                InputStream imageStream = new java.net.URL(imageUrl).openStream();
+                byte[] imageBytes = imageStream.readAllBytes();
+
+                return ResponseEntity
+                        .ok()
+                        .header("Content-Type", "image/jpeg") // or "image/png" depending on the content
+                        .body(imageBytes);
+
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Failed to load image from Cloudinary.");
+            }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("CV not found.");
+        }
+    }
+
+
 }
+
+
+

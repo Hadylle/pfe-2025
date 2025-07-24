@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axiosInstance from '../axiosInstance'; // make sure this path is correct
+import axiosInstance from '../api/axiosInstance'; // make sure this path is correct
 
 const useFetch = (url) => {
   const [data, setData] = useState(null);

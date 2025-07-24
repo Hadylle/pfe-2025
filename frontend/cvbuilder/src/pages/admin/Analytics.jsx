@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import useFetch from '../../api/hooks/useFetch';
+import useFetch from '../../hooks/useFetch';
 import PieChart from '../../components/dashboard/PieChart';
 import StatsCard from '../../components/dashboard/StatsCard';
 

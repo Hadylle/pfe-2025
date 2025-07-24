@@ -6,7 +6,6 @@ import CVPreview from '../components/Home/cv-preview';
 import CallToAction from '../components/Home/call-to-action';
 import FeaturesSection from '../components/Home/features-section';
 import Testimonials from '../components/Home/testimonials';
-import Footer from '../components/footer';
 import FAQ from '../components/Home/faq';
 
 const Home = () => {

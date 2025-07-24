@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import useFetch from '../../api/hooks/useFetch';
+import useFetch from '../../hooks/useFetch';
 import CvCard from './CvCard';
 
 const UserDetailsModal = ({ user, onClose }) => {

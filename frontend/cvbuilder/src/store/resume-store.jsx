@@ -23,6 +23,12 @@ export const useResumeStore = create((set) => ({
   resumeData: { ...defaultData },
 
   selectedTemplate: 'classic',
+   selectedLanguage: 'en',
+  selectedColorScheme: 'default',
+  setSelectedTemplate: (template) => set({ selectedTemplate: template }),
+  setSelectedLanguage: (lang) => set({ selectedLanguage: lang }),
+    setSelectedColorScheme: (scheme) => set({ selectedColorScheme: scheme }),
+
 
   updateField: (field, value) => set((state) => ({
     resumeData: { ...state.resumeData, [field]: value }
