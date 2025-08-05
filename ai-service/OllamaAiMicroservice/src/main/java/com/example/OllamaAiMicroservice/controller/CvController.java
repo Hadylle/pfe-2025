@@ -80,6 +80,22 @@ public class CvController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    @PostMapping("/match")
+    public ResponseEntity<CvMatchResult> matchCvToJob(
+            @RequestParam("cv") MultipartFile cvFile,
+            @RequestParam("jobDescription") String jobDescription,
+            @RequestHeader("X-User-Sub") String userSub
+    ) {
+        try {
+            String cvText = fileParserService.parseFile(cvFile);
+            CvMatchResult result = cvMatchingService.matchCvToJob(cvText, jobDescription);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @PostMapping("/build/save")
     public ResponseEntity<CvEntity> saveBuiltCv(
             @RequestBody BuildRequestDto dto,
