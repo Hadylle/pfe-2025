@@ -10,7 +10,7 @@ export default function PersonalInfoForm() {
   const [photoPreview, setPhotoPreview] = useState('');
   const [isLoadingPhoto, setIsLoadingPhoto] = useState(false);
 
-  const { register, watch } = useForm({
+  const { register, watch, reset } = useForm({
     defaultValues: {
       name: resumeData.name || '',
       email: resumeData.email || '',
@@ -23,7 +23,19 @@ export default function PersonalInfoForm() {
       photo: resumeData.photo || ''
     }
   });
-
+useEffect(() => {
+  reset({
+    name: resumeData.name || '',
+    email: resumeData.email || '',
+    phone: resumeData.phone || '',
+    address: resumeData.address || '',
+    portfolio: resumeData.portfolio || '',
+    linkedin: resumeData.linkedin || '',
+    github: resumeData.github || '',
+    aboutMe: resumeData.aboutMe || '',
+    photo: resumeData.photo || ''
+  });
+}, [resumeData, reset]);
   const watchedFormData = watch();
   const [formData] = useDebounce(watchedFormData, 300);
 

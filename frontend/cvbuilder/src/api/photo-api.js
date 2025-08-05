@@ -1,6 +1,10 @@
 import axiosInstance from './axiosInstance';
 
 export const uploadProfilePicture = async (file, userSub, cvId) => {
+  if (!cvId) {
+    throw new Error("CV ID is required");
+  }
+
   const formData = new FormData();
   formData.append('file', file);
 
@@ -10,6 +14,7 @@ export const uploadProfilePicture = async (file, userSub, cvId) => {
     {
       headers: {
         'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem('token')}` // Add auth token
       },
     }
   );

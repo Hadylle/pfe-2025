@@ -12,13 +12,22 @@ export async function tailorCv(cvFile, jobDescription) {
     throw new Error("Both CV and job description are required.");
   }
 
+  console.log('CV File:', cvFile); // Check file object
+  console.log('File type:', cvFile.type); // Check MIME type
+  console.log('File size:', cvFile.size); // Check size
+
   const formData = new FormData();
   formData.append("cv", cvFile);
   formData.append("jobDescription", jobDescription);
+
+  // Log FormData contents (for debugging)
+  for (let [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
 
   const response = await axiosInstance.post("/cv/tailor", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 
-  return response.data; // Tailored CV JSON
+  return response.data;
 }

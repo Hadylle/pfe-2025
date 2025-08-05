@@ -59,6 +59,7 @@ public class SecurityConfig {
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.addExposedHeader("Authorization");
+        config.addExposedHeader("X-User-Sub");
         config.setMaxAge(3600L);  // 1 hour cache for preflight responses
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -67,4 +68,5 @@ public class SecurityConfig {
         return new CorsWebFilter(source);
 
     }
+
 }

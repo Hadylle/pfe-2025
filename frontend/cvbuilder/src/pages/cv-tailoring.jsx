@@ -11,7 +11,7 @@ import BuildResume from './build-resume';
 import { tailorCv } from '../api/tailor-cv-api';
 import { useProgress } from '../components/ProgressContext';
 import { useResumeStore } from '../store/resume-store';
-
+import { normalizeCvData } from '../utils/normalizeCvData';
 export default function CvTailoringPage() {
   const [cvFile, setCvFile] = useState(null);
   const [jobText, setJobText] = useState('');
@@ -35,7 +35,7 @@ export default function CvTailoringPage() {
 
     try {
       const tailoredJson = await tailorCv(cvFile, jobText);
-      setAllData(tailoredJson);
+setAllData(normalizeCvData(tailoredJson));
       complete();
       setShowEditor(true);
     } catch (err) {

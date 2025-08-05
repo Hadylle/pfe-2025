@@ -7,11 +7,8 @@ import axiosInstance from './axiosInstance';
  * @returns {Promise<{ improvedJson: Object, improvedPdf: Blob }>}
  */
 export async function improveCvAndGeneratePdf(file) {
-  if (!file) {
-    throw new Error("CV file is required.");
-  }
+  if (!file) throw new Error("CV file is required.");
 
-  // 1. Send the file to improve endpoint
   const formData = new FormData();
   formData.append('file', file);
 
@@ -20,8 +17,8 @@ export async function improveCvAndGeneratePdf(file) {
   });
 
   const improvedJson = improveResponse.data;
+  console.log('📦 Improved JSON received from backend:', improvedJson);
 
-  // 2. Generate the PDF from the improved JSON
   const pdfFormData = new FormData();
   pdfFormData.append("cvData", JSON.stringify(improvedJson));
 

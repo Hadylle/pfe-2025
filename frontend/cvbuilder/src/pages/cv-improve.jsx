@@ -11,6 +11,7 @@ import { useResumeStore } from '../store/resume-store';
 import { improveCvAndGeneratePdf } from '../api/cv-improve-api';
 import { useProgress } from '../components/ProgressContext';
 import { useMutation } from '@tanstack/react-query';
+import { normalizeCvData } from '../utils/normalizeCvData';
 
 export default function CvImprovePage() {
   const [cvFile, setCvFile] = useState(null);
@@ -26,7 +27,7 @@ export default function CvImprovePage() {
     },
     onSuccess: (data) => {
       const { improvedPdf, improvedJson } = data;
-      setAllData(improvedJson);
+setAllData(normalizeCvData(improvedJson));
       const blobUrl = URL.createObjectURL(improvedPdf);
       complete();
       setResumeGenerated(true);

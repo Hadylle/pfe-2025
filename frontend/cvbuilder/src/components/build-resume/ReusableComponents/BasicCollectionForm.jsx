@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useResumeStore } from '../../../store/resume-store';
-import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { motion } from 'framer-motion';
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { FormContainer } from './FormContainer';
+
 export function BasicCollectionForm({ 
   title, 
   storeKey, 
@@ -14,6 +14,11 @@ export function BasicCollectionForm({
 }) {
   const { resumeData, addArrayItem, removeArrayItem } = useResumeStore();
   const [formState, setFormState] = useState(initialState);
+
+  // Reset formState when the relevant store data changes externally
+  useEffect(() => {
+    setFormState(initialState);
+  }, [resumeData[storeKey], initialState]);
 
   const updateField = (fieldName, value) => {
     setFormState(prev => ({ ...prev, [fieldName]: value }));

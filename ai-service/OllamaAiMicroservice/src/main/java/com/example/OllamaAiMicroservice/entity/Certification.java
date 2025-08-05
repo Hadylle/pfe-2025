@@ -21,6 +21,7 @@ public class Certification {
     private String year;
 
     @ManyToOne
+    @JoinColumn(name = "cv_id", referencedColumnName = "id")
     @JsonBackReference
     private CvEntity cv;
 }
