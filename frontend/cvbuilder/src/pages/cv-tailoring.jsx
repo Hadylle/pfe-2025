@@ -1,48 +1,47 @@
 import { useState } from 'react';
 import robotAnimation from '../assets/robot.json';
-import { SectionLayout } from '../components/layout/SectionLayout';
-import { PageLayout} from '../components/layout/PageLayout';
-
-import { Textarea } from '../components/ui/Input';
-import { ErrorMessage } from '../components/ui/ErrorMessage';
-import LottieHeader from '../components/features/LottieHeader';
-import CVUploadForm from '../components/features/CVUploadForm';
-import BuildResume from './build-resume';
+import { CvAnalysisLayout } from '../components/common/CvAnalysisLayout';
 import { tailorCv } from '../api/tailor-cv-api';
-import { useProgress } from '../components/ProgressContext';
 import { useResumeStore } from '../store/resume-store';
 import { normalizeCvData } from '../utils/normalizeCvData';
+import BuildResume from './build-resume';
+import { useProgress } from '../components/ProgressContext';
+import { Textarea } from '../components/ui/Input';
+import EnhancedReviewBar from '../components/EnhancedReviewBar';
+
 export default function CvTailoringPage() {
-  const [cvFile, setCvFile] = useState(null);
   const [jobText, setJobText] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showEditor, setShowEditor] = useState(false);
-
-  const { start, complete, error } = useProgress();
+  const [resumeReady, setResumeReady] = useState(false);
+  const [submittedRating, setSubmittedRating] = useState(false);
   const { setAllData } = useResumeStore();
+  const { start, complete, error } = useProgress();
 
-  const handleFileChange = (e) => setCvFile(e.target.files[0]);
-
-  const handleTailorCv = async () => {
+  const handleTailor = async (cvFile) => {
     if (!cvFile || !jobText.trim()) {
-      alert('Please upload your CV and paste the job description.');
-      return;
+      throw new Error('CV or job description missing.');
     }
-
-    start('Tailoring your CV to match the job...');
-    setErrorMessage('');
-    setShowEditor(false);
 
     try {
+      start('Tailoring your CV to match the job...');
       const tailoredJson = await tailorCv(cvFile, jobText);
-setAllData(normalizeCvData(tailoredJson));
+      setAllData(normalizeCvData(tailoredJson));
       complete();
-      setShowEditor(true);
+      setResumeReady(true);
+      setSubmittedRating(false);
     } catch (err) {
       console.error('❌ Tailoring error:', err);
-      setErrorMessage('Something went wrong while generating your tailored CV.');
       error();
+      throw new Error('Tailoring failed.');
     }
+  };
+
+  const handleError = () => {
+    alert('Something went wrong while uploading or tailoring your CV.');
+    error();
+  };
+
+  const handleRatingSubmit = () => {
+    setSubmittedRating(true);
   };
 
   const additionalFormContent = (
@@ -55,40 +54,32 @@ setAllData(normalizeCvData(tailoredJson));
     />
   );
 
-  return (
-    <PageLayout containerType="full">
-      {!showEditor ? (
-        <>
-          <SectionLayout>
-            <LottieHeader
-              animationData={robotAnimation}
-              text="Upload your CV and job offer to generate a tailored version for better matching."
-            />
-
-            <CVUploadForm
-              onFileChange={handleFileChange}
-              onSubmit={handleTailorCv}
-              buttonLabel="🎯 Tailor My CV"
-              buttonColor="#0091e3"
-              buttonHover="#0c549f"
-            >
-              {additionalFormContent}
-            </CVUploadForm>
-          </SectionLayout>
-
-          {errorMessage && (
-            <ErrorMessage
-              message={errorMessage}
-              onRetry={() => setErrorMessage('')}
-              retryLabel="Clear Error"
-            />
-          )}
-        </>
-      ) : (
-        <div className="mt-12 w-full">
-          <BuildResume mode="edit-after-tailor" />
-        </div>
-      )}
-    </PageLayout>
+  return !resumeReady ? (
+    <CvAnalysisLayout
+      animationData={robotAnimation}
+      headerText="Upload your CV and job offer to generate a tailored version for better matching."
+      buttonLabel="🎯 Tailor My CV"
+      buttonEmoji="🎯"
+      apiFunction={handleTailor}
+      onSuccess={() => {}}
+      onError={handleError}
+      additionalFormContent={additionalFormContent}
+    />
+  ) : (
+    <div className="mt-12">
+      <BuildResume mode="edit-after-tailor" />
+      <div className="mt-10">
+        <EnhancedReviewBar
+          pageUrl="/cv-tailoring"
+          onSubmitted={handleRatingSubmit}
+          key="cv-tailoring-review"
+        />
+        {submittedRating && (
+          <p className="text-green-600 text-center mt-2">
+            Thank you for rating the tailoring result!
+          </p>
+        )}
+      </div>
+    </div>
   );
 }

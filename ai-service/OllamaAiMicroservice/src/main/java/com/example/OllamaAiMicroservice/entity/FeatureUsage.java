@@ -18,6 +18,18 @@ public class FeatureUsage {
     private String featureName;
 
     private String userSub;
+    private LocalDateTime timestamp;
+
 
     private LocalDateTime usedAt;
+    // New fields for ratings
+    private Integer ratingValue;
+    private String pageContext;
+    // Constructor for regular feature logging (backwards compatible)
+    public FeatureUsage(Long id, String featureName, String userSub, LocalDateTime timestamp) {
+        this.id = id;
+        this.featureName = featureName;
+        this.userSub = userSub;
+        this.timestamp = timestamp;
+    }
 }

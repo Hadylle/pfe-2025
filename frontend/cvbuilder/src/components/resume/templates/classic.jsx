@@ -21,7 +21,7 @@ const ClassicTemplate = ({
           {renderHeader()}
 
           {/* About Me */}
-          {data.aboutMe && renderSection('aboutMe', 
+          {data.aboutMe && renderSection('About Me', 
             <p className={colors.text}>{data.aboutMe}</p>
           )}
 

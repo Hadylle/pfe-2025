@@ -50,7 +50,7 @@ const ModernTemplate = ({
               )}
               
               {/* About Me */}
-              {aboutMe && renderSection('aboutMe', 
+              {aboutMe && renderSection('About Me', 
                 <p className={`${colors.text} mb-6 leading-relaxed`}>{aboutMe}</p>
               )}
 

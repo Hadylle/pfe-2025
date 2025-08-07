@@ -3,12 +3,12 @@ import { useResumeStore } from '../../store/resume-store';
 import { useForm } from 'react-hook-form';
 import { useDebounce } from 'use-debounce';
 import { FormContainer } from './ReusableComponents/FormContainer';
-import { uploadProfilePicture, getProfilePicture } from '../../api/photo-api';
 
 export default function PersonalInfoForm() {
   const { resumeData, updateField } = useResumeStore();
   const [photoPreview, setPhotoPreview] = useState('');
   const [isLoadingPhoto, setIsLoadingPhoto] = useState(false);
+  const [selectedPhotoFile, setSelectedPhotoFile] = useState(null); // ✅ declare this!
 
   const { register, watch, reset } = useForm({
     defaultValues: {
@@ -23,130 +23,98 @@ export default function PersonalInfoForm() {
       photo: resumeData.photo || ''
     }
   });
-useEffect(() => {
-  reset({
-    name: resumeData.name || '',
-    email: resumeData.email || '',
-    phone: resumeData.phone || '',
-    address: resumeData.address || '',
-    portfolio: resumeData.portfolio || '',
-    linkedin: resumeData.linkedin || '',
-    github: resumeData.github || '',
-    aboutMe: resumeData.aboutMe || '',
-    photo: resumeData.photo || ''
-  });
-}, [resumeData, reset]);
+
+  // Sync resumeData into form
+  useEffect(() => {
+    reset({
+      name: resumeData.name || '',
+      email: resumeData.email || '',
+      phone: resumeData.phone || '',
+      address: resumeData.address || '',
+      portfolio: resumeData.portfolio || '',
+      linkedin: resumeData.linkedin || '',
+      github: resumeData.github || '',
+      aboutMe: resumeData.aboutMe || '',
+      photo: resumeData.photo || ''
+    });
+  }, [resumeData, reset]);
+
+  // Debounced form watcher
   const watchedFormData = watch();
   const [formData] = useDebounce(watchedFormData, 300);
 
-  // Load existing profile picture on component mount
-  useEffect(() => {
-    const loadExistingPhoto = async () => {
-      const userSub = localStorage.getItem('userSub');
-      const cvId = resumeData.id;
-      
-      if (userSub && cvId) {
-        setIsLoadingPhoto(true);
-        try {
-          const imageUrl = await getProfilePicture(userSub, cvId);
-          if (imageUrl) {
-            setPhotoPreview(imageUrl);
-            updateField('photo', imageUrl);
-          }
-        } catch (error) {
-          console.error('Failed to load existing photo:', error);
-        } finally {
-          setIsLoadingPhoto(false);
-        }
-      }
-    };
-
-    // Only load if we don't already have a photo preview
-    if (!photoPreview && resumeData.id) {
-      loadExistingPhoto();
-    }
-  }, [resumeData.id, updateField]);
-
-  // Handle form data changes
+  // Update store on changes
   useEffect(() => {
     Object.entries(formData).forEach(([field, value]) => {
       if (resumeData[field] !== value) {
+        console.log(`[updateField] ${field}:`, value);
         updateField(field, value);
       }
     });
-  }, [formData, resumeData, updateField]);
+  }, [formData]);
 
-  const handlePhotoChange = async (e) => {
+  // Handle photo upload
+  const handlePhotoChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      try {
-        setIsLoadingPhoto(true);
-        const userSub = localStorage.getItem('userSub');
-        const cvId = resumeData.id;
-        
-        const updatedCv = await uploadProfilePicture(file, userSub, cvId);
-        
-        // If the backend returns the full CV object with photo URL
-        if (updatedCv.profilePictureUrl) {
-          setPhotoPreview(updatedCv.profilePictureUrl);
-          updateField('photo', updatedCv.profilePictureUrl);
-        } else {
-          // Fallback: fetch the photo again to get the URL
-          const imageUrl = await getProfilePicture(userSub, cvId);
-          if (imageUrl) {
-            setPhotoPreview(imageUrl);
-            updateField('photo', imageUrl);
-          }
-        }
-      } catch (error) {
-        console.error('Upload failed:', error);
-        alert('Failed to upload photo. Please try again.');
-      } finally {
-        setIsLoadingPhoto(false);
-      }
-    }
-  };
+    if (!file) return;
 
-  const removePhoto = async () => {
-    // Clean up blob URL if it exists
+    console.log('[handlePhotoChange] Selected file:', file);
+
     if (photoPreview && photoPreview.startsWith('blob:')) {
       URL.revokeObjectURL(photoPreview);
     }
-    
-    setPhotoPreview('');
-    updateField('photo', '');
-    
-    // Note: You might want to add a delete endpoint to actually remove 
-    // the photo from Cloudinary and database
+
+    const previewUrl = URL.createObjectURL(file);
+    setPhotoPreview(previewUrl);
+    setSelectedPhotoFile(file);
+
+    updateField('photo', previewUrl);
+    updateField('photoFile', file);
   };
 
-  // Clean up blob URLs on component unmount
+  // Remove photo
+  const removePhoto = () => {
+    if (photoPreview && photoPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(photoPreview);
+    }
+
+    console.log('[removePhoto] Removed photo preview and file.');
+    setPhotoPreview('');
+    setSelectedPhotoFile(null);
+    updateField('photo', '');
+    updateField('photoFile', null);
+  };
+
+  // Cleanup preview URL
   useEffect(() => {
     return () => {
       if (photoPreview && photoPreview.startsWith('blob:')) {
         URL.revokeObjectURL(photoPreview);
+        console.log('[cleanup] Revoked preview URL on unmount.');
       }
     };
-  }, []);
+  }, [photoPreview]);
 
   return (
     <FormContainer title="Personal Information">
       <div className="space-y-4">
-        {/* Photo Upload */}
+        {/* Profile Photo */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">Profile Photo</label>
           <div className="flex items-center gap-4">
             <div className="relative">
               <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                {isLoadingPhoto ? (
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                ) : photoPreview ? (
-                  <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                {photoPreview ? (
+                  <img
+                    src={photoPreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <span className="text-3xl text-gray-500">👤</span>
                 )}
               </div>
-              {photoPreview && !isLoadingPhoto && (
+              {photoPreview && (
                 <button
                   type="button"
                   onClick={removePhoto}
@@ -165,24 +133,19 @@ useEffect(() => {
                 accept="image/*"
                 onChange={handlePhotoChange}
                 className="hidden"
-                disabled={isLoadingPhoto}
               />
               <label
                 htmlFor="photo-upload"
-                className={`cursor-pointer block w-full px-4 py-2 text-sm font-medium text-center rounded-md border ${
-                  isLoadingPhoto 
-                    ? 'text-gray-400 bg-gray-50 border-gray-200 cursor-not-allowed' 
-                    : 'text-blue-700 bg-blue-50 hover:bg-blue-100 border-blue-200'
-                }`}
+                className="cursor-pointer block w-full px-4 py-2 text-sm font-medium text-center rounded-md border text-blue-700 bg-blue-50 hover:bg-blue-100 border-blue-200"
               >
-                {isLoadingPhoto ? 'Processing...' : photoPreview ? 'Change Photo' : 'Upload Photo'}
+                {photoPreview ? 'Change Photo' : 'Upload Photo'}
               </label>
               <p className="text-xs text-gray-500 mt-1">Square images work best (max 2MB)</p>
             </div>
           </div>
         </div>
 
-        {/* Name */}
+        {/* Rest of the form fields */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Full Name*</label>
           <input
@@ -192,7 +155,6 @@ useEffect(() => {
           />
         </div>
 
-        {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Email*</label>
           <input
@@ -203,7 +165,6 @@ useEffect(() => {
           />
         </div>
 
-        {/* Phone */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Phone</label>
           <input
@@ -214,7 +175,6 @@ useEffect(() => {
           />
         </div>
 
-        {/* Address */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Address</label>
           <input
@@ -224,7 +184,6 @@ useEffect(() => {
           />
         </div>
 
-        {/* Portfolio */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Portfolio Website</label>
           <input
@@ -234,7 +193,6 @@ useEffect(() => {
           />
         </div>
 
-        {/* LinkedIn */}
         <div>
           <label className="block text-sm font-medium text-gray-700">LinkedIn</label>
           <input
@@ -244,7 +202,6 @@ useEffect(() => {
           />
         </div>
 
-        {/* GitHub */}
         <div>
           <label className="block text-sm font-medium text-gray-700">GitHub</label>
           <input
@@ -254,7 +211,6 @@ useEffect(() => {
           />
         </div>
 
-        {/* About Me */}
         <div>
           <label className="block text-sm font-medium text-gray-700">About Me*</label>
           <textarea

@@ -247,4 +247,24 @@ public class CvController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("CV not found.");
         }
     }
+
+    @PostMapping("/submit-rating")
+    public ResponseEntity<?> submitRating(
+            @RequestParam int rating,
+            @RequestParam String pageUrl,
+            @RequestHeader("X-User-Sub") String userSub) {
+
+        try {
+            featureUsageService.logRating("page_rating", userSub, rating, pageUrl);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/page-ratings")
+    public ResponseEntity<List<FeatureUsage>> getPageRatings() {
+        return ResponseEntity.ok(featureUsageService.getRatingsForFeature("page_rating"));
+    }
 }

@@ -3,6 +3,8 @@ import { useResumeStore } from '../../store/resume-store';
 import ClassicTemplate from './templates/classic';
 import ModernTemplate from './templates/modern';
 import { motion } from 'framer-motion';
+import BoldTemplate from './templates/BoldTemplate';
+import CleanTemplate from './templates/CleanTemplate';
 
 export default function ResumePreview({ previewMode = false }) {
   const { resumeData, selectedTemplate } = useResumeStore();
@@ -14,8 +16,12 @@ export default function ResumePreview({ previewMode = false }) {
         return <ClassicTemplate {...props} />;
       case 'modern':
         return <ModernTemplate {...props} />;
+      case 'bold':
+        return <BoldTemplate {...props}/>;
+      case 'clean':
+        return <CleanTemplate {...props}/>  
       default:
-        return <ClassicTemplate {...props} />;
+        return <BoldTemplate {...props} />;
     }
   };
 

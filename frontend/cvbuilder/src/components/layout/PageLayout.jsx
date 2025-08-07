@@ -13,11 +13,9 @@ export function PageLayout({
     : componentStyles.layout.contentContainer;
 
   return (
-    <div className={componentStyles.layout.pageContainer}>
       <main className={cn(containerClass, className)}>
         {children}
       </main>
-      {showFooter && <Footer />}
-    </div>
+     
   );
 }

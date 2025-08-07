@@ -1,45 +1,27 @@
 import { useState } from 'react';
 import robotAnimation from '../assets/robot.json';
-import { SectionLayout } from '../components/layout/SectionLayout';
-import { PageLayout } from '../components/layout/PageLayout';
-
+import { CvAnalysisLayout } from '../components/common/CvAnalysisLayout';
 import { Textarea } from '../components/ui/Input';
-import { ErrorMessage } from '../components/ui/ErrorMessage';
-import LottieHeader from '../components/features/LottieHeader';
-import CVUploadForm from '../components/features/CVUploadForm';
 import MatchResultDisplay from '../components/features/MatchResultDisplay';
 import { matchCvToJob } from '../api/cv-match-api';
-import { useProgress } from '../components/ProgressContext';
+import EnhancedReviewBar from '../components/EnhancedReviewBar';
 
 export default function CvMatchingPage() {
-  const [cvFile, setCvFile] = useState(null);
   const [jobText, setJobText] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const [matchResult, setMatchResult] = useState(null);
+  const [submittedRating, setSubmittedRating] = useState(false);
 
-  const { start, complete, error } = useProgress();
+  const handleSuccess = (result) => {
+    setMatchResult(result);
+    setSubmittedRating(false);
+  };
 
-  const handleFileChange = (e) => setCvFile(e.target.files?.[0]);
+  const handleError = () => {
+    alert('Something went wrong while checking your match.');
+  };
 
-  const handleMatchCheck = async () => {
-    if (!cvFile || !jobText.trim()) {
-      alert('Please upload your CV and paste the job description.');
-      return;
-    }
-
-    start('Matching your CV to the job...');
-    setErrorMessage('');
-    setMatchResult(null);
-
-    try {
-      const result = await matchCvToJob(cvFile, jobText);
-      setMatchResult(result);
-      complete();
-    } catch (err) {
-      console.error('❌ Match error:', err);
-      setErrorMessage('Something went wrong while checking your match.');
-      error();
-    }
+  const handleRatingSubmit = () => {
+    setSubmittedRating(true);
   };
 
   const additionalFormContent = (
@@ -52,40 +34,42 @@ export default function CvMatchingPage() {
     />
   );
 
+  const handleMatch = async (cvFile) => {
+    if (!cvFile || !jobText.trim()) {
+      throw new Error('CV or job description missing.');
+    }
+    return await matchCvToJob(cvFile, jobText);
+  };
+
   return (
-    <PageLayout containerType="full">
-      {!matchResult ? (
-        <>
-          <SectionLayout>
-            <LottieHeader
-              animationData={robotAnimation}
-              text="Upload your CV and job offer to check if it's a good match."
-            />
-
-            <CVUploadForm
-              onFileChange={handleFileChange}
-              onSubmit={handleMatchCheck}
-              buttonLabel="✅ Check Match"
-              buttonColor="#ce0227"
-              buttonHover="#a4001d"
-            >
-              {additionalFormContent}
-            </CVUploadForm>
-          </SectionLayout>
-
-          {errorMessage && (
-            <ErrorMessage
-              message={errorMessage}
-              onRetry={() => setErrorMessage('')}
-              retryLabel="Clear Error"
-            />
-          )}
-        </>
-      ) : (
-        <div className="mt-12 w-full">
-          <MatchResultDisplay result={matchResult} />
-        </div>
-      )}
-    </PageLayout>
+    <CvAnalysisLayout
+      animationData={robotAnimation}
+      headerText="Upload your CV and job offer to check if they match!"
+      buttonLabel="Check Match"
+      buttonEmoji="✅"
+      apiFunction={handleMatch}
+      onSuccess={handleSuccess}
+      onError={handleError}
+      additionalFormContent={additionalFormContent}
+      resultComponent={
+        matchResult
+          ? () => (
+              <>
+                <MatchResultDisplay result={matchResult} />
+                <EnhancedReviewBar
+                  pageUrl="/cv-matching"
+                  onSubmitted={handleRatingSubmit}
+                  key="cv-matching-review"
+                />
+                {submittedRating && (
+                  <p className="text-green-600 text-center mt-2">
+                    Thank you for rating this match result!
+                  </p>
+                )}
+              </>
+            )
+          : null
+      }
+    />
   );
 }
